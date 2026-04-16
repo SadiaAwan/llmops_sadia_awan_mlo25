@@ -1,7 +1,5 @@
-# Keep DB logic separate — this is good MLOps hygiene
-
 import duckdb
-from models import RestaurantSearcher
+from models import Restaurant
 
 DB_FILE = "restaurants.db"
 
@@ -13,7 +11,7 @@ def init_db():
             cuisine TEXT,
             price_level TEXT,
             rating DOUBLE,
-            description TEXT,
+            short_description TEXT,
             opening_hours TEXT,
             location TEXT
         )
@@ -21,7 +19,7 @@ def init_db():
     conn.close()
 
 
-def insert_restaurant(r: RestaurantSearcher):
+def insert_restaurant(r: Restaurant):
     conn = duckdb.connect(DB_FILE)
     conn.execute("""
         INSERT INTO restaurants VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -30,7 +28,7 @@ def insert_restaurant(r: RestaurantSearcher):
         r.cuisine,
         r.price_level,
         r.rating,
-        r.description,
+        r.short_description,
         r.opening_hours,
         r.location
     ))

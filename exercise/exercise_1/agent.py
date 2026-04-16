@@ -1,32 +1,38 @@
-# PydanticAI agent
-
-# Create Agent
+# Create PydanticAI agent
 
 # This is where your LLM logic lives.
-
-from pydantic import BaseModel, Field
-from models import RestaurantList
+from constants import MODEL_LARGE
 from pydantic_ai import Agent
+from models import Restaurant
+from dotenv import load_dotenv
 
-
+load_dotenv()
 
 agent = Agent(
-    "openrouter:nvidia/nemotron-3-super-120b-a12b:free",
-    system_prompt=""" 
+    model=MODEL_LARGE,
+    system_prompt="""
 You are a restaurant recommendation assistant.
-The user gives you a location.
-Return exactly 5 restaurant near the place.
-It is allowed to invent restaurant if needed, 
-but they should still look realistic and relevant to the location.
-Very cuisine types.
-Keep descriptions short and useful.
-Ratings must be between 1 and 5.
-Price level must be one of: $, $$, $$$
 
-    """, output_type=RestaurantList)
+Given a location and cuisine, generate ONE realistic restaurant.
 
+Return:
+- name
+- cuisine
+- price_level ($, $$, $$$)
+- rating (0-5)
+- description
+- opening_hours
+- location
 
-async def generate_restaurant(location: str, cuisine: str):
-    prompt = f"Location: {location}, Cuisine: {cuisine}"
-    result = await agent.run(prompt)
-    return result.data
+Be realistic and concise.
+""", output_type=Restaurant
+)
+
+def generate_restaurant(location: str, cuisine: str) -> Restaurant:
+    prompt = (
+        f"Create one realistic restaurant for this request.\n"
+        f"Location: {location}\n"
+        f"cuisine{cuisine}"
+    )
+    result = agent.run_sync(prompt)
+    return result.output
